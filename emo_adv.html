@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Intensity Rating</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .audio-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .target-emotion {
+            background: #e9f4ff;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            text-align: left;
+            font-size: 1.1em;
+        }
+        
+        .target-emotion strong {
+            color: #667eea;
+            font-weight: 700;
+        }
+        
+        .target-emotion .emotion-value {
+            color: #333;
+            font-weight: 600;
+            font-style: italic;
+        }
+        
+        .audio-player {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px 0;
+        }
+        
+        .instruction-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.95em;
+            color: #856404;
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            background: #e9ecef;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .intensity-selection {
+            margin-bottom: 30px;
+        }
+        
+        .intensity-selection h3 {
+            margin-bottom: 20px;
+            color: #495057;
+            font-size: 1.3em;
+        }
+        
+        .intensity-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .intensity-option {
+            position: relative;
+        }
+        
+        .intensity-option input[type="radio"] {
+            display: none;
+        }
+        
+        .intensity-option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 8px;
+            background: #ffffff;
+            border: 3px solid #dee2e6;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            min-height: 80px;
+            box-sizing: border-box;
+            line-height: 1.2;
+        }
+        
+        .intensity-option label:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .intensity-option input[type="radio"]:checked + label {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 150px;
+        }
+        
+        #load-btn {
+            padding: 20px 40px;
+            font-size: 1.2em;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .status {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .results-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        
+        .task-description {
+            background: #e8f4f8;
+            border: 2px solid #b3e0ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+        
+        .task-description strong {
+            color: #1e88e5;
+            font-size: 1.2em;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+        
+        /* Instruction Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+        
+        .close:hover {
+            opacity: 0.7;
+        }
+        
+        .modal-body {
+            padding: 30px;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+        
+        .instruction-text {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .highlight {
+            font-style: italic;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .more-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .more-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Finish Page Modal Styles */
+        .finish-modal {
+            max-width: 700px;
+            text-align: center;
+        }
+
+        .finish-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            padding: 30px;
+        }
+
+        .finish-header h2 {
+            font-size: 2em;
+            margin: 0;
+        }
+
+        .finish-body {
+            padding: 40px 30px;
+        }
+
+        .finish-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .finish-icon {
+            font-size: 4em;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .finish-title {
+            font-size: 2.2em;
+            color: #28a745;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .finish-message {
+            font-size: 1.3em;
+            line-height: 1.6;
+            color: #495057;
+            max-width: 500px;
+            margin: 0;
+        }
+
+        .emphasis-highlight {
+            color: #667eea;
+            font-weight: 800;
+            font-size: 1.1em;
+            text-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .finish-stats {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: 800;
+            color: #28a745;
+            text-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            color: #6c757d;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* User ID Section Styles */
+        .user-id-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .user-id-section h3 {
+            margin-bottom: 20px;
+            color: #495057;
+            font-size: 1.3em;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #user-id {
+            padding: 15px 20px;
+            border: 3px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 500;
+            text-align: center;
+            width: 100%;
+            max-width: 300px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        #user-id:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+        
+        .input-note {
+            font-size: 0.9em;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .intensity-options {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .intensity-option label {
+                font-size: 0.85em;
+                min-height: 70px;
+                padding: 12px 6px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .intensity-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .intensity-option label {
+                min-height: 60px;
+            }
+            
+            .user-id-section {
+                padding: 20px;
+            }
+            
+            .task-description {
+                padding: 20px;
+                font-size: 1em;
+            }
+            
+            .task-description strong {
+                font-size: 1.1em;
+            }
+            
+            #user-id {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Emotion Intensity Annotation</h1>
+            <p>Rate the intensity of the target emotion in each voice sample</p>
+        </div>
+        
+        <div class="content">
+            <div class="progress-info">
+                <span id="progress">Loading...</span>
+                <span id="total-count">Total: 0</span>
+            </div>
+            
+            <div class="status" id="status">
+                <span class="emoji">🎯</span>
+                Please enter your ID and click "Start" to begin annotation
+            </div>
+            
+            <div class="user-id-section" id="user-id-section">
+                <h3>👤 Enter Your ID</h3>
+                <div class="input-group">
+                    <input type="text" id="user-id" placeholder="Enter your user ID..." maxlength="50">
+                    <span class="input-note">This ID will be used to identify your annotations</span>
+                </div>
+            </div>
+            
+            <div class="task-description">
+                <strong>📋 Description:</strong> For this task, you will listen to a generated audio sample. You will also be given a specific emotion label (Happy, Angry, Sad, or Surprised). Your task is to very carefully listen to the audio and rate how intense or activated that given emotion feels in the speaker's voice on a scale of 1 to 5.
+            </div>
+            
+            <div class="audio-section" id="audio-section" style="display: none;">
+                <div class="target-emotion" id="target-emotion">
+                    <strong>Target emotion:</strong> <span class="emotion-value" id="emotion-label">loading...</span>
+                </div>
+                <h3>🎧 Audio Clip</h3>
+                <audio id="audio-player" class="audio-player" controls>
+                    Your browser does not support the audio element.
+                </audio>
+                <div class="instruction-note">
+                    Select <strong>Unclear</strong> if the audio quality is too poor to determine the intensity of the emotion.
+                </div>
+            </div>
+            
+            <div class="intensity-selection" id="intensity-selection" style="display: none;">
+                <h3>📈 Intensity Rating</h3>
+                <div class="intensity-options">
+                    <div class="intensity-option">
+                        <input type="radio" id="very-low" name="intensity" value="1 - Very Low">
+                        <label for="very-low">1 – Very Low</label>
+                    </div>
+                    <div class="intensity-option">
+                        <input type="radio" id="low" name="intensity" value="2 - Low">
+                        <label for="low">2 – Low</label>
+                    </div>
+                    <div class="intensity-option">
+                        <input type="radio" id="moderate" name="intensity" value="3 - Moderate">
+                        <label for="moderate">3 – Moderate</label>
+                    </div>
+                    <div class="intensity-option">
+                        <input type="radio" id="high" name="intensity" value="4 - High">
+                        <label for="high">4 – High</label>
+                    </div>
+                    <div class="intensity-option">
+                        <input type="radio" id="very-high" name="intensity" value="5 - Very High">
+                        <label for="very-high">5 – Very High</label>
+                    </div>
+                    <div class="intensity-option">
+                        <input type="radio" id="unclear" name="intensity" value="Unclear">
+                        <label for="unclear">Unclear</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="load-btn" onclick="loadData()">
+                    <span class="emoji">🚀</span> START
+                </button>
+                <button class="btn btn-primary" id="next-btn" onclick="nextAudio()" style="display: none;">
+                    <span class="emoji">➡️</span> NEXT
+                </button>
+                <button class="btn btn-secondary" id="instructions-btn" onclick="showInstructions()" style="display: none;">
+                    <span class="emoji">📋</span> INSTRUCTIONS
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div id="instructionsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Instructions</h2>
+                <span class="close" onclick="closeInstructions()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="instruction-text">
+                    Listen carefully and choose <span class="highlight">one score (1–5)</span> that best matches the strength of the <span class="highlight" id="modal-emotion">target emotion</span> you hear.
+                </div>
+                <div class="instruction-text">
+                    For more information, see the detailed instructions at <a href="https://ag027592.github.io/emotionalTTS-labeling-instruction/intensity.html" target="_blank" class="more-link">this link</a>.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Finish Page Modal -->
+    <div id="finishModal" class="modal">
+        <div class="modal-content finish-modal">
+            <div class="modal-header finish-header">
+                <h2>🎉 Task Completed!</h2>
+            </div>
+            <div class="modal-body finish-body">
+                <div class="finish-content">
+                    <div class="finish-icon">🎊</div>
+                    <h3 class="finish-title">Congratulations!</h3>
+                    <p class="finish-message">
+                        You have successfully completed <strong class="emphasis-highlight">all emotion intensity annotations</strong>! 
+                        Thank you for your valuable contribution to this research.
+                    </p>
+                    <div class="finish-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="total-completed">0</span>
+                            <span class="stat-label">Audio clips annotated</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let audioUrls = [];
+        let emotionLabels = [];
+        let currentIndex = 0;
+        let annotations = [];
+        
+        // Load audio URLs and emotion labels from CSV data
+        async function loadData() {
+            // Validate user ID first
+            const userId = document.getElementById('user-id').value.trim();
+            if (!userId) {
+                updateStatus('❗ Please enter your user ID before loading data!', 'error');
+                document.getElementById('user-id').focus();
+                return;
+            }
+            
+            try {
+                // Try to fetch CSV file
+                let csvText;
+                try {
+                    const response = await fetch('task1_adv/adv_split1.csv');
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    csvText = await response.text();
+                } catch (fetchError) {
+                    // If fetch fails, show instructions for manual loading
+                    updateStatus(`❌ Cannot load CSV file automatically. Please copy and paste the CSV content manually or serve the file from a local server.`, 'error');
+                    showManualLoadInstructions();
+                    return;
+                }
+                
+                // Parse CSV
+                const lines = csvText.trim().split('\n');
+                if (lines.length < 2) {
+                    throw new Error('CSV file appears to be empty or has no data rows');
+                }
+                
+                const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                const urlIndex = headers.findIndex(h => h.toLowerCase() === 'audio_url');
+                const emotionIndex = headers.findIndex(h => h.toLowerCase() === 'emotion_label');
+                
+                if (urlIndex === -1) {
+                    throw new Error('audio_url column not found in CSV headers: ' + headers.join(', '));
+                }
+                
+                if (emotionIndex === -1) {
+                    throw new Error('emotion_label column not found in CSV headers: ' + headers.join(', '));
+                }
+                
+                audioUrls = [];
+                emotionLabels = [];
+                
+                lines.slice(1).forEach(line => {
+                    const columns = line.split(',');
+                    const url = columns[urlIndex];
+                    const emotion = columns[emotionIndex];
+                    
+                    if (url && url.trim() && emotion && emotion.trim()) {
+                        audioUrls.push(url.trim().replace(/"/g, ''));
+                        emotionLabels.push(emotion.trim().replace(/"/g, ''));
+                    }
+                });
+                
+                if (audioUrls.length === 0) {
+                    throw new Error('No valid audio URLs found in CSV file');
+                }
+                
+                updateStatus(`✅ Loaded ${audioUrls.length} audio clips successfully!`, 'success');
+                updateProgress();
+                loadCurrentAudio();
+                
+                // Switch from Start button to Next button and show annotation sections
+                document.getElementById('load-btn').style.display = 'none';
+                document.getElementById('user-id-section').style.display = 'none';
+                document.getElementById('next-btn').style.display = 'inline-block';
+                document.getElementById('instructions-btn').style.display = 'inline-block';
+                document.getElementById('audio-section').style.display = 'block';
+                document.getElementById('intensity-selection').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                updateStatus(`❌ Error loading data: ${error.message}`, 'error');
+            }
+        }
+        
+        function showManualLoadInstructions() {
+            const instructionsHTML = `
+                <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                    <h4>📋 Manual CSV Loading Instructions:</h4>
+                    <ol>
+                        <li><strong>Option 1:</strong> Start a local server:
+                            <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+# In terminal, navigate to this folder and run:
+python -m http.server 8000
+# or
+python3 -m http.server 8000
+
+# Then open: http://localhost:8000/emo_adv.html</pre>
+                        </li>
+                        <li><strong>Option 2:</strong> Copy CSV content and modify the loadDataManually() function below</li>
+                    </ol>
+                </div>
+            `;
+            
+            document.querySelector('.results-info').innerHTML = instructionsHTML;
+        }
+        
+        function loadCurrentAudio() {
+            if (currentIndex < audioUrls.length) {
+                const audioPlayer = document.getElementById('audio-player');
+                const emotionLabel = document.getElementById('emotion-label');
+                const modalEmotion = document.getElementById('modal-emotion');
+                
+                audioPlayer.src = audioUrls[currentIndex];
+                emotionLabel.textContent = emotionLabels[currentIndex];
+                modalEmotion.textContent = emotionLabels[currentIndex];
+                
+                updateProgress();
+                clearSelection();
+            }
+        }
+        
+        function updateProgress() {
+            document.getElementById('progress').textContent = 
+                `Audio ${currentIndex + 1} of ${audioUrls.length}`;
+            document.getElementById('total-count').textContent = 
+                `Total: ${audioUrls.length}`;
+        }
+        
+        function updateStatus(message, type = '') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+        
+        function getSelectedIntensity() {
+            const radios = document.querySelectorAll('input[name="intensity"]');
+            for (let radio of radios) {
+                if (radio.checked) {
+                    return radio.value;
+                }
+            }
+            return null;
+        }
+        
+        function clearSelection() {
+            const radios = document.querySelectorAll('input[name="intensity"]');
+            radios.forEach(radio => radio.checked = false);
+        }
+        
+        async function nextAudio() {
+            const selectedIntensity = getSelectedIntensity();
+            
+            if (!selectedIntensity) {
+                updateStatus('❗ Please select an intensity rating before proceeding!', 'error');
+                return;
+            }
+            
+            // Save annotation to server
+            if (currentIndex < audioUrls.length) {
+                const userId = document.getElementById('user-id').value.trim();
+                const annotation = {
+                    user_id: userId,
+                    audio_url: audioUrls[currentIndex],
+                    target_emotion: emotionLabels[currentIndex],
+                    selected_intensity: selectedIntensity,
+                    timestamp: new Date().toISOString(),
+                    session_id: getSessionId()
+                };
+                
+                try {
+                    await saveAnnotationToServer(annotation);
+                    updateStatus(`✅ Saved "${selectedIntensity}". Listen to the next audio clip.`, 'success');
+                } catch (error) {
+                    updateStatus(`❌ Failed to save annotation. Please try again.`, 'error');
+                    console.error('Save error:', error);
+                    return;
+                }
+            }
+            
+            // Move to next
+            currentIndex++;
+            
+            if (currentIndex >= audioUrls.length) {
+                updateStatus(`🎉 All annotations complete! Thank you for your participation.`, 'success');
+                document.getElementById('next-btn').disabled = true;
+                showFinishModal();
+                return;
+            }
+            
+            // Load next audio
+            loadCurrentAudio();
+        }
+        
+        // Generate unique session ID for this annotation session
+        function getSessionId() {
+            let sessionId = localStorage.getItem('intensity_session_id');
+            if (!sessionId) {
+                sessionId = 'intensity_session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('intensity_session_id', sessionId);
+            }
+            return sessionId;
+        }
+        
+        // Save annotation to server
+        async function saveAnnotationToServer(annotation) {
+            try {
+                const response = await fetch('/save_intensity_annotation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(annotation)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('Annotation saved successfully:', result);
+                return result;
+                
+            } catch (error) {
+                console.error('Failed to save annotation:', error);
+                // Fallback: save to local storage as backup
+                saveAnnotationLocally(annotation);
+                throw error;
+            }
+        }
+        
+        // Fallback: save to local storage
+        function saveAnnotationLocally(annotation) {
+            const localAnnotations = JSON.parse(localStorage.getItem('backup_intensity_annotations') || '[]');
+            localAnnotations.push(annotation);
+            localStorage.setItem('backup_intensity_annotations', JSON.stringify(localAnnotations));
+            console.log('Intensity annotation saved to local backup');
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                nextAudio();
+            } else if (e.key >= '1' && e.key <= '6') {
+                const intensityOptions = ['very-low', 'low', 'moderate', 'high', 'very-high', 'unclear'];
+                const index = parseInt(e.key) - 1;
+                if (index < intensityOptions.length) {
+                    document.getElementById(intensityOptions[index]).checked = true;
+                }
+            }
+        });
+        
+        // Instructions modal functions
+        function showInstructions() {
+            document.getElementById('instructionsModal').style.display = 'block';
+        }
+        
+        function closeInstructions() {
+            document.getElementById('instructionsModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const instructionsModal = document.getElementById('instructionsModal');
+            
+            if (event.target == instructionsModal) {
+                instructionsModal.style.display = 'none';
+            }
+            // Note: Finish modal cannot be closed - completion is final
+        }
+        
+        // Finish modal functions
+        function showFinishModal() {
+            document.getElementById('total-completed').textContent = audioUrls.length;
+            document.getElementById('finishModal').style.display = 'block';
+        }
+
+        // Initialize
+        updateStatus('Enter your ID and click "START" to begin annotation', '');
+    </script>
+</body>
+</html>
