@@ -427,6 +427,28 @@
             letter-spacing: 1px;
         }
         
+        .accuracy-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .accuracy-stats {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .accuracy-details {
+            font-size: 1em;
+            color: #6c757d;
+            text-align: center;
+            font-weight: 500;
+        }
+        
         /* User ID Section Styles */
         .user-id-section {
             background: #f8f9fa;
@@ -661,6 +683,17 @@
                         <div class="stat-item">
                             <span class="stat-number" id="total-completed">0</span>
                             <span class="stat-label">Audio clips annotated</span>
+                        </div>
+                    </div>
+                    <div class="accuracy-section" id="accuracy-section" style="display: none;">
+                        <div class="accuracy-stats">
+                            <div class="stat-item">
+                                <span class="stat-number" id="accuracy-percentage">--</span>
+                                <span class="stat-label">Accuracy</span>
+                            </div>
+                            <div class="accuracy-details">
+                                <span id="accuracy-details">Calculating accuracy...</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -954,10 +987,128 @@ python3 -m http.server 8000
             // Note: Finish modal cannot be closed - completion is final
         }
         
+        // Accuracy calculation function
+        async function calculateAccuracy() {
+            try {
+                const userId = document.getElementById('user-id').value.trim();
+                const accuracySection = document.getElementById('accuracy-section');
+                const accuracyPercentage = document.getElementById('accuracy-percentage');
+                const accuracyDetails = document.getElementById('accuracy-details');
+                
+                // Show accuracy section
+                accuracySection.style.display = 'block';
+                
+                // Fetch user annotations
+                const userAnnotationsResponse = await fetch(`/annotations/emotion_class_split${currentSplit}.csv`);
+                if (!userAnnotationsResponse.ok) {
+                    throw new Error('Could not load user annotations');
+                }
+                const userAnnotationsCsv = await userAnnotationsResponse.text();
+                
+                // Fetch ground truth answers
+                const groundTruthResponse = await fetch(`/answer/task5_emo_class/emo_class${currentSplit}.csv`);
+                if (!groundTruthResponse.ok) {
+                    throw new Error('Could not load ground truth answers');
+                }
+                const groundTruthCsv = await groundTruthResponse.text();
+                
+                // Parse CSV data
+                const userAnnotations = parseCSV(userAnnotationsCsv);
+                const groundTruth = parseCSV(groundTruthCsv);
+                
+                // Filter user annotations for current user and session
+                const currentSessionId = getSessionId();
+                const userAnswers = userAnnotations.filter(row => 
+                    row['user_id'] === userId && 
+                    row['session_id'] === currentSessionId
+                );
+                
+                if (userAnswers.length === 0) {
+                    accuracyDetails.textContent = 'No annotations found for accuracy calculation.';
+                    return;
+                }
+                
+                // Create lookup dictionaries
+                const userDict = {};
+                userAnswers.forEach(row => {
+                    if (row['Input.audio_url']) {
+                        const filename = row['Input.audio_url'].split('/').pop();
+                        userDict[filename] = row['Answer.perceived_emotion.label'];
+                    }
+                });
+                
+                const answerDict = {};
+                groundTruth.forEach(row => {
+                    if (row['FileName'] && row['Emotion']) {
+                        answerDict[row['FileName']] = row['Emotion'];
+                    }
+                });
+                
+                // Calculate accuracy (exact match for emotions)
+                let correct = 0;
+                let total = 0;
+                
+                for (const filename in userDict) {
+                    if (answerDict[filename]) {
+                        total++;
+                        const userAnswer = userDict[filename];
+                        const correctAnswer = answerDict[filename];
+                        
+                        // Exact match comparison (emotions should match exactly)
+                        const isMatch = userAnswer === correctAnswer;
+                        
+                        if (isMatch) {
+                            correct++;
+                        }
+                        
+                        // Debug logging for verification
+                        console.log(`${filename}: "${userAnswer}" vs "${correctAnswer}" = ${isMatch ? '✓' : '✗'}`);
+                    }
+                }
+                
+                if (total > 0) {
+                    const accuracy = Math.round((correct / total) * 100);
+                    accuracyPercentage.textContent = `${accuracy}%`;
+                    accuracyDetails.textContent = `${correct}/${total} correct answers`;
+                } else {
+                    accuracyDetails.textContent = 'No matching audio files found for accuracy calculation.';
+                }
+                
+            } catch (error) {
+                console.error('Error calculating accuracy:', error);
+                document.getElementById('accuracy-details').textContent = 'Unable to calculate accuracy at this time.';
+            }
+        }
+        
+        // Helper function to parse CSV data
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            if (lines.length < 2) return [];
+            
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header] = values[index] || '';
+                });
+                data.push(row);
+            }
+            
+            return data;
+        }
+
         // Finish modal functions
         function showFinishModal() {
             document.getElementById('total-completed').textContent = audioUrls.length;
             document.getElementById('finishModal').style.display = 'block';
+            
+            // Calculate accuracy after showing the modal
+            setTimeout(() => {
+                calculateAccuracy();
+            }, 500);
         }
 
         // Initialize

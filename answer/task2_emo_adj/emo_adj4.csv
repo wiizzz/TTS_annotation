@@ -1,0 +1,21 @@
+FileName,respLevel,Majority Vote,SpkrID,Gender,EmoInt
+1050_WSI_ANG_XX.wav,83.7,angry,1050,Male,Hi
+1047_IEO_ANG_HI.wav,81.3,angry,1047,Female,Hi
+1050_TSI_ANG_XX.wav,81.9,angry,1050,Male,Hi
+1064_IWW_ANG_XX.wav,85.0,angry,1064,Male,Hi
+1044_IEO_ANG_HI.wav,91.9,angry,1044,Male,Hi
+1058_IWL_ANG_XX.wav,81.9,angry,1058,Female,Hi
+1089_TIE_ANG_XX.wav,86.0,angry,1089,Female,Hi
+1013_IEO_ANG_HI.wav,85.09,angry,1013,Female,Hi
+1009_IEO_ANG_HI.wav,80.09,angry,1009,Female,Hi
+1037_TIE_ANG_XX.wav,81.1,angry,1037,Female,Hi
+1059_IEO_ANG_HI.wav,80.0,angry,1059,Male,Hi
+1033_WSI_HAP_XX.wav,44.8,angry,1033,Male,Low
+1070_MTI_HAP_XX.wav,44.33,happy,1070,Male,Low
+1075_IWW_ANG_XX.wav,40.5,angry,1075,Female,Low
+1051_TIE_ANG_XX.wav,43.4,angry,1051,Male,Low
+1006_IEO_SAD_MD.wav,42.09,sad,1006,Female,Low
+1080_TIE_ANG_XX.wav,40.44,angry,1080,Male,Low
+1026_IWL_SAD_XX.wav,41.6,angry,1026,Male,Low
+1004_DFA_NEU_XX.wav,26.7,angry,1004,Female,Low
+1087_TIE_ANG_XX.wav,44.33,angry,1087,Male,Low

@@ -6,6 +6,7 @@ Saves emotion annotations securely without exposing results to annotators.
 
 import http.server
 import socketserver
+from socketserver import ThreadingMixIn
 import webbrowser
 import os
 import json
@@ -15,6 +16,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 PORT = int(os.environ.get('PORT', 8001))
+
+class ThreadedEmotionServer(ThreadingMixIn, socketserver.TCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
 
 class EmotionAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -28,6 +33,36 @@ class EmotionAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         """Handle preflight requests"""
         self.send_response(200)
         self.end_headers()
+    
+    def do_GET(self):
+        """Handle GET requests"""
+        parsed_path = urlparse(self.path)
+        
+        # Serve annotation files for accuracy calculation
+        if parsed_path.path.startswith('/annotations/') or parsed_path.path.startswith('/answer/'):
+            try:
+                # Remove leading slash and construct file path
+                file_path = Path(parsed_path.path[1:])  # Remove leading '/'
+                
+                if file_path.exists() and file_path.is_file():
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'text/csv')
+                    self.end_headers()
+                    
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        self.wfile.write(f.read().encode('utf-8'))
+                    return
+                else:
+                    self.send_error(404, f"File not found: {file_path}")
+                    return
+                    
+            except Exception as e:
+                print(f"Error serving file: {e}")
+                self.send_error(500, f"Server error: {e}")
+                return
+        
+        # Default GET handler for regular files
+        super().do_GET()
     
     def do_POST(self):
         """Handle POST requests for saving emotion annotations"""
@@ -112,8 +147,8 @@ def main():
     # Change to the script directory
     os.chdir(Path(__file__).parent)
     
-    # Create server (bind to all interfaces for deployment)
-    with socketserver.TCPServer(("0.0.0.0", PORT), EmotionAnnotationHTTPRequestHandler) as httpd:
+    # Create threaded server for concurrent users (bind to all interfaces for deployment)
+    with ThreadedEmotionServer(("0.0.0.0", PORT), EmotionAnnotationHTTPRequestHandler) as httpd:
         print(f"🚀 Starting emotion annotation server at http://localhost:{PORT}")
         print(f"📁 Serving files from: {os.getcwd()}")
         print(f"🎭 Open: http://localhost:{PORT}/emotion_home.html")

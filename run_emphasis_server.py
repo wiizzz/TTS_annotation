@@ -6,6 +6,7 @@ Saves emphasis annotations securely without exposing results to annotators.
 
 import http.server
 import socketserver
+from socketserver import ThreadingMixIn
 import webbrowser
 import os
 import json
@@ -17,6 +18,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 PORT = int(os.environ.get('PORT', 8003))
+
+class ThreadedEmphasisServer(ThreadingMixIn, socketserver.TCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
 
 class EmphasisAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -30,6 +35,36 @@ class EmphasisAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler)
         """Handle preflight requests"""
         self.send_response(200)
         self.end_headers()
+    
+    def do_GET(self):
+        """Handle GET requests"""
+        parsed_path = urlparse(self.path)
+        
+        # Serve annotation files for accuracy calculation
+        if parsed_path.path.startswith('/annotations/') or parsed_path.path.startswith('/answer/'):
+            try:
+                # Remove leading slash and construct file path
+                file_path = Path(parsed_path.path[1:])  # Remove leading '/'
+                
+                if file_path.exists() and file_path.is_file():
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'text/csv')
+                    self.end_headers()
+                    
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        self.wfile.write(f.read().encode('utf-8'))
+                    return
+                else:
+                    self.send_error(404, f"File not found: {file_path}")
+                    return
+                    
+            except Exception as e:
+                print(f"Error serving file: {e}")
+                self.send_error(500, f"Server error: {e}")
+                return
+        
+        # Default GET handler for regular files
+        super().do_GET()
     
     def do_POST(self):
         """Handle POST requests for saving emphasis annotations"""
@@ -88,8 +123,8 @@ class EmphasisAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler)
         # Use specific filename for emphasis annotations based on split
         csv_file = annotations_dir / f'emphasis_split{split_number}.csv'
         
-        # Retry mechanism for file locking
-        max_retries = 10
+        # Retry mechanism for file locking - increased for concurrent users
+        max_retries = 50
         for attempt in range(max_retries):
             try:
                 # Check if file exists to determine if we need headers
@@ -124,7 +159,7 @@ class EmphasisAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler)
             except (IOError, OSError) as e:
                 if attempt < max_retries - 1:
                     print(f"⚠️ File lock attempt {attempt + 1} failed, retrying...")
-                    time.sleep(0.1 * (attempt + 1))  # Exponential backoff
+                    time.sleep(0.2 * (attempt + 1))  # Longer exponential backoff for concurrent users
                 else:
                     raise Exception(f"Failed to acquire file lock after {max_retries} attempts: {e}")
 
@@ -132,8 +167,8 @@ def main():
     # Change to the script directory
     os.chdir(Path(__file__).parent)
     
-    # Create server (bind to all interfaces for deployment)
-    with socketserver.TCPServer(("0.0.0.0", PORT), EmphasisAnnotationHTTPRequestHandler) as httpd:
+    # Create threaded server for concurrent users (bind to all interfaces for deployment)
+    with ThreadedEmphasisServer(("0.0.0.0", PORT), EmphasisAnnotationHTTPRequestHandler) as httpd:
         print(f"🚀 Starting emphasis annotation server at http://localhost:{PORT}")
         print(f"📁 Serving files from: {os.getcwd()}")
         print(f"🗣️  Open: http://localhost:{PORT}/emphasis_home.html")
