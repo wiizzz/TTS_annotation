@@ -569,7 +569,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🗣️ Perceived Word Emphasis</h1>
+            <h1>Perceived Word Emphasis Annotation</h1>
             <p>Listen carefully and identify which word sounds most emphasized</p>
         </div>
         
@@ -689,6 +689,24 @@
         let sentences = [];
         let currentIndex = 0;
         let annotations = [];
+        let currentSplit = 1; // Default split
+        
+        // Get split parameter from URL
+        function getSplitFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const split = urlParams.get('split');
+            return split ? parseInt(split) : 1;
+        }
+        
+        // Initialize split on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            currentSplit = getSplitFromURL();
+            updatePageTitle();
+        });
+        
+        function updatePageTitle() {
+            document.querySelector('.header h1').textContent = `Perceived Word Emphasis - Split ${currentSplit}`;
+        }
         
         // Proper CSV parser that handles quoted fields with commas
         function parseCSVLine(line) {
@@ -741,7 +759,8 @@
                 // Try to fetch CSV file
                 let csvText;
                 try {
-                    const response = await fetch('task3_emphasis/emphasis_split5.csv');
+                    const csvFile = `task3_emphasis/emphasis_split${currentSplit}.csv`;
+                    const response = await fetch(csvFile);
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
@@ -955,7 +974,8 @@ python3 -m http.server 8000
                     sentence: sentences[currentIndex],
                     selected_emphasis: selectedEmphasis,
                     timestamp: new Date().toISOString(),
-                    session_id: getSessionId()
+                    session_id: getSessionId(),
+                    split: currentSplit
                 };
                 
                 try {

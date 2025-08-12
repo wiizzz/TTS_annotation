@@ -54,8 +54,11 @@ class EmphasisAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler)
                 if field not in annotation:
                     raise ValueError(f"Missing required field: {field}")
             
+            # Extract split number from the annotation data if available
+            split_number = annotation.get('split', 1)
+            
             # Save to CSV file
-            self.save_emphasis_annotation_to_csv(annotation)
+            self.save_emphasis_annotation_to_csv(annotation, split_number)
             
             # Send success response
             response = {"status": "success", "message": "Emphasis annotation saved successfully"}
@@ -76,14 +79,14 @@ class EmphasisAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler)
             self.end_headers()
             self.wfile.write(json.dumps(response).encode('utf-8'))
     
-    def save_emphasis_annotation_to_csv(self, annotation):
-        """Save emphasis annotation to emphasis_split1.csv file with file locking"""
+    def save_emphasis_annotation_to_csv(self, annotation, split_number=1):
+        """Save emphasis annotation to emphasis_split*.csv file with file locking"""
         # Create annotations directory if it doesn't exist
         annotations_dir = Path('annotations')
         annotations_dir.mkdir(exist_ok=True)
         
-        # Use specific filename for emphasis annotations
-        csv_file = annotations_dir / 'emphasis_split1.csv'
+        # Use specific filename for emphasis annotations based on split
+        csv_file = annotations_dir / f'emphasis_split{split_number}.csv'
         
         # Retry mechanism for file locking
         max_retries = 10
@@ -133,14 +136,14 @@ def main():
     with socketserver.TCPServer(("0.0.0.0", PORT), EmphasisAnnotationHTTPRequestHandler) as httpd:
         print(f"🚀 Starting emphasis annotation server at http://localhost:{PORT}")
         print(f"📁 Serving files from: {os.getcwd()}")
-        print(f"🗣️  Open: http://localhost:{PORT}/emphasis.html")
-        print(f"💾 Emphasis annotations will be saved to: annotations/emphasis_split1.csv")
+        print(f"🗣️  Open: http://localhost:{PORT}/emphasis_home.html")
+        print(f"💾 Emphasis annotations will be saved to: annotations/emphasis_split1-4.csv")
         print(f"⏹️  Press Ctrl+C to stop the server")
         
         # Only open browser automatically in local development
         if os.environ.get('DEVELOPMENT') == 'true':
             try:
-                webbrowser.open(f'http://localhost:{PORT}/emphasis.html')
+                webbrowser.open(f'http://localhost:{PORT}/emphasis_home.html')
                 print("🌐 Opened browser automatically")
             except:
                 print("❌ Could not open browser automatically")

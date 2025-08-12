@@ -635,6 +635,24 @@
         let audioUrls = [];
         let currentIndex = 0;
         let annotations = [];
+        let currentSplit = 1; // Default split
+        
+        // Get split parameter from URL
+        function getSplitFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const split = urlParams.get('split');
+            return split ? parseInt(split) : 1;
+        }
+        
+        // Initialize split on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            currentSplit = getSplitFromURL();
+            updatePageTitle();
+        });
+        
+        function updatePageTitle() {
+            document.querySelector('.header h1').textContent = `Speaker Age Group Annotation - Split ${currentSplit}`;
+        }
         
         // Load audio URLs from CSV data
         async function loadData() {
@@ -650,7 +668,8 @@
                 // Try to fetch CSV file
                 let csvText;
                 try {
-                    const response = await fetch('task4_age/age_split1.csv');
+                    const csvFile = `task4_age/age_split${currentSplit}.csv`;
+                    const response = await fetch(csvFile);
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
@@ -787,7 +806,8 @@ python3 -m http.server 8000
                     audio_url: audioUrls[currentIndex],
                     selected_age: selectedAge,
                     timestamp: new Date().toISOString(),
-                    session_id: getSessionId()
+                    session_id: getSessionId(),
+                    split: currentSplit
                 };
                 
                 try {

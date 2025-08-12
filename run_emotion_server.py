@@ -52,8 +52,11 @@ class EmotionAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 if field not in annotation:
                     raise ValueError(f"Missing required field: {field}")
             
+            # Extract split number from the annotation data if available
+            split_number = annotation.get('split', 1)
+            
             # Save to CSV file
-            self.save_emotion_annotation_to_csv(annotation)
+            self.save_emotion_annotation_to_csv(annotation, split_number)
             
             # Send success response
             response = {"status": "success", "message": "Emotion annotation saved successfully"}
@@ -74,14 +77,14 @@ class EmotionAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps(response).encode('utf-8'))
     
-    def save_emotion_annotation_to_csv(self, annotation):
-        """Save emotion annotation to emotion_class_split1.csv file"""
+    def save_emotion_annotation_to_csv(self, annotation, split_number=1):
+        """Save emotion annotation to emotion_class_split*.csv file"""
         # Create annotations directory if it doesn't exist
         annotations_dir = Path('annotations')
         annotations_dir.mkdir(exist_ok=True)
         
-        # Use specific filename for emotion annotations
-        csv_file = annotations_dir / 'emotion_class_split1.csv'
+        # Use specific filename for emotion annotations based on split
+        csv_file = annotations_dir / f'emotion_class_split{split_number}.csv'
         
         # Check if file exists to determine if we need headers
         file_exists = csv_file.exists()
@@ -113,14 +116,14 @@ def main():
     with socketserver.TCPServer(("0.0.0.0", PORT), EmotionAnnotationHTTPRequestHandler) as httpd:
         print(f"🚀 Starting emotion annotation server at http://localhost:{PORT}")
         print(f"📁 Serving files from: {os.getcwd()}")
-        print(f"🎭 Open: http://localhost:{PORT}/emotion_annotation.html")
-        print(f"💾 Emotion annotations will be saved to: annotations/emotion_class_split1.csv")
+        print(f"🎭 Open: http://localhost:{PORT}/emotion_home.html")
+        print(f"💾 Emotion annotations will be saved to: annotations/emotion_class_split1-6.csv")
         print(f"⏹️  Press Ctrl+C to stop the server")
         
         # Only open browser automatically in local development
         if os.environ.get('DEVELOPMENT') == 'true':
             try:
-                webbrowser.open(f'http://localhost:{PORT}/emotion_annotation.html')
+                webbrowser.open(f'http://localhost:{PORT}/emotion_home.html')
                 print("🌐 Opened browser automatically")
             except:
                 print("❌ Could not open browser automatically")

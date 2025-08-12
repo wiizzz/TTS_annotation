@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaker Age Group Annotation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .split-selection {
+            text-align: center;
+        }
+        
+        .split-selection h2 {
+            color: #495057;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+        
+        .split-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .split-option {
+            background: #f8f9fa;
+            border: 3px solid #dee2e6;
+            border-radius: 15px;
+            padding: 25px;
+            text-decoration: none;
+            color: #495057;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .split-option:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            color: #667eea;
+        }
+        
+        .split-option h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .split-option p {
+            font-size: 1em;
+            opacity: 0.8;
+        }
+        
+        .emoji {
+            font-size: 2em;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .description {
+            background: #e8f4f8;
+            border: 2px solid #b3e0ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .description strong {
+            color: #1e88e5;
+            font-size: 1.2em;
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .header p {
+                font-size: 1em;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .split-selection h2 {
+                font-size: 1.5em;
+            }
+            
+            .split-option {
+                padding: 20px;
+            }
+            
+            .split-option h3 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Speaker Age Group Annotation</h1>
+            <p>Choose which data split you want to annotate</p>
+        </div>
+        
+        <div class="content">
+            <div class="description">
+                <strong>📋 Task Overview:</strong> 
+                You will listen to audio clips and determine the perceived age group of each speaker. 
+                Before you begin, please review the detailed task instructions at the provided <a href="https://ag027592.github.io/emotionalTTS-labeling-instruction/age.html" target="_blank" class="more-link">link</a>. 
+                Then, select the data split you would like to work on.
+            </div>
+            
+            <div class="split-selection">
+                <h2>Select Data Split</h2>
+                <div class="split-options">
+                    <a href="age_annotation.html?split=1" class="split-option">
+                        <h3>Split 1</h3>
+                        <p>First batch of audio samples</p>
+                    </a>
+                    <a href="age_annotation.html?split=2" class="split-option">
+                        <h3>Split 2</h3>
+                        <p>Second batch of audio samples</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
