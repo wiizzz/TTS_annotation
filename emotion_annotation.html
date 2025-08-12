@@ -725,6 +725,12 @@
                     throw new Error('No valid audio URLs found in CSV file');
                 }
                 
+                // Randomize the order to prevent listener fatigue
+                for (let i = audioUrls.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [audioUrls[i], audioUrls[j]] = [audioUrls[j], audioUrls[i]];
+                }
+                
                 updateStatus(`✅ Loaded ${audioUrls.length} audio clips successfully!`, 'success');
                 updateProgress();
                 loadCurrentAudio();
@@ -892,6 +898,11 @@ python3 -m http.server 8000
         
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
+            // Only allow keyboard shortcuts after audio data is loaded
+            if (audioUrls.length === 0) {
+                return;
+            }
+            
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 nextAudio();

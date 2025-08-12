@@ -10,6 +10,8 @@ import webbrowser
 import os
 import json
 import csv
+import fcntl
+import time
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
@@ -75,7 +77,7 @@ class IntensityAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler
             self.wfile.write(json.dumps(response).encode('utf-8'))
     
     def save_intensity_annotation_to_csv(self, annotation):
-        """Save intensity annotation to adv_split1.csv file"""
+        """Save intensity annotation to adv_split1.csv file with file locking"""
         # Create annotations directory if it doesn't exist
         annotations_dir = Path('annotations')
         annotations_dir.mkdir(exist_ok=True)
@@ -83,28 +85,45 @@ class IntensityAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler
         # Use specific filename for intensity annotations
         csv_file = annotations_dir / 'adv_split1.csv'
         
-        # Check if file exists to determine if we need headers
-        file_exists = csv_file.exists()
-        
-        # Write annotation to CSV
-        with open(csv_file, 'a', newline='', encoding='utf-8') as f:
-            fieldnames = ['user_id', 'session_id', 'audio_url', 'target_emotion', 'selected_intensity', 'timestamp']
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            
-            # Write header if new file
-            if not file_exists:
-                writer.writeheader()
-                print(f"📁 Created new intensity annotation file: {csv_file}")
-            
-            # Write annotation data
-            writer.writerow({
-                'user_id': annotation['user_id'],
-                'session_id': annotation['session_id'],
-                'audio_url': annotation['audio_url'],
-                'target_emotion': annotation['target_emotion'],
-                'selected_intensity': annotation['selected_intensity'],
-                'timestamp': annotation['timestamp']
-            })
+        # Retry mechanism for file locking
+        max_retries = 10
+        for attempt in range(max_retries):
+            try:
+                # Check if file exists to determine if we need headers
+                file_exists = csv_file.exists()
+                
+                # Write annotation to CSV with file locking
+                with open(csv_file, 'a', newline='', encoding='utf-8') as f:
+                    # Lock the file (Unix/Linux/Mac)
+                    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+                    
+                    fieldnames = ['user_id', 'session_id', 'Input.audio_url', 'target_emotion', 'Answer.emotion_intensity.label', 'timestamp']
+                    writer = csv.DictWriter(f, fieldnames=fieldnames)
+                    
+                    # Write header if new file (check again after acquiring lock)
+                    if not file_exists and f.tell() == 0:
+                        writer.writeheader()
+                        print(f"📁 Created new intensity annotation file: {csv_file}")
+                    
+                    # Write annotation data
+                    writer.writerow({
+                        'user_id': annotation['user_id'],
+                        'session_id': annotation['session_id'],
+                        'Input.audio_url': annotation['audio_url'],
+                        'target_emotion': annotation['target_emotion'],
+                        'Answer.emotion_intensity.label': annotation['selected_intensity'],
+                        'timestamp': annotation['timestamp']
+                    })
+                    
+                    # File lock is automatically released when file is closed
+                break
+                
+            except (IOError, OSError) as e:
+                if attempt < max_retries - 1:
+                    print(f"⚠️ File lock attempt {attempt + 1} failed, retrying...")
+                    time.sleep(0.1 * (attempt + 1))  # Exponential backoff
+                else:
+                    raise Exception(f"Failed to acquire file lock after {max_retries} attempts: {e}")
 
 def main():
     # Change to the script directory

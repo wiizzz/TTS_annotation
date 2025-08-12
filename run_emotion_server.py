@@ -88,7 +88,7 @@ class EmotionAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         
         # Write annotation to CSV
         with open(csv_file, 'a', newline='', encoding='utf-8') as f:
-            fieldnames = ['user_id', 'session_id', 'audio_url', 'selected_emotion', 'timestamp']
+            fieldnames = ['user_id', 'session_id', 'Input.audio_url', 'Answer.perceived_emotion.label', 'timestamp']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             
             # Write header if new file
@@ -100,8 +100,8 @@ class EmotionAnnotationHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             writer.writerow({
                 'user_id': annotation['user_id'],
                 'session_id': annotation['session_id'],
-                'audio_url': annotation['audio_url'],
-                'selected_emotion': annotation['selected_emotion'],
+                'Input.audio_url': annotation['audio_url'],
+                'Answer.perceived_emotion.label': annotation['selected_emotion'],
                 'timestamp': annotation['timestamp']
             })
 
