@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emotion Intensity Rating (adv.)</title>
+    <title>Emotion Intensity Rating (adj.)</title>
     <style>
         * {
             margin: 0;
@@ -234,13 +234,49 @@
             color: #155724;
         }
         
-        .results-info {
+        .user-id-section {
             background: #f8f9fa;
-            padding: 20px;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .user-id-section h3 {
+            margin-bottom: 20px;
+            color: #495057;
+            font-size: 1.3em;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #user-id {
+            padding: 15px 20px;
+            border: 3px solid #dee2e6;
             border-radius: 10px;
-            margin-top: 30px;
+            font-size: 1.1em;
+            font-weight: 500;
+            text-align: center;
+            width: 100%;
+            max-width: 300px;
+            transition: all 0.3s ease;
+        }
+        
+        #user-id:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+        
+        .input-note {
             font-size: 0.9em;
             color: #6c757d;
+            font-style: italic;
         }
         
         .task-description {
@@ -343,6 +379,7 @@
         }
 
         /* Finish Page Modal Styles */
+        
         .finish-modal {
             max-width: 700px;
             text-align: center;
@@ -351,11 +388,13 @@
         .finish-header {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             padding: 30px;
+            border-radius: 15px 15px 0 0;
         }
 
         .finish-header h2 {
             font-size: 2em;
             margin: 0;
+            color: white;
         }
 
         .finish-body {
@@ -405,11 +444,6 @@
             color: #667eea;
             font-weight: 800;
             font-size: 1.1em;
-            text-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .finish-stats {
@@ -431,7 +465,6 @@
             font-size: 3em;
             font-weight: 800;
             color: #28a745;
-            text-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
         }
 
         .stat-label {
@@ -464,53 +497,6 @@
             font-weight: 500;
         }
         
-        /* User ID Section Styles */
-        .user-id-section {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .user-id-section h3 {
-            margin-bottom: 20px;
-            color: #495057;
-            font-size: 1.3em;
-        }
-        
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        #user-id {
-            padding: 15px 20px;
-            border: 3px solid #dee2e6;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: 500;
-            text-align: center;
-            width: 100%;
-            max-width: 300px;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-        
-        #user-id:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
-        }
-        
-        .input-note {
-            font-size: 0.9em;
-            color: #6c757d;
-            font-style: italic;
-        }
-        
         @media (max-width: 768px) {
             .intensity-options {
                 grid-template-columns: repeat(2, 1fr);
@@ -518,15 +504,9 @@
             }
             
             .intensity-option label {
-                font-size: 0.85em;
-                min-height: 70px;
+                font-size: 0.8em;
                 padding: 12px 6px;
-            }
-        }
-        
-        @media (max-width: 600px) {
-            .intensity-options {
-                grid-template-columns: 1fr;
+                min-height: 70px;
             }
             
             .controls {
@@ -540,26 +520,12 @@
             .content {
                 padding: 20px;
             }
-            
-            .intensity-option label {
-                min-height: 60px;
-            }
-            
-            .user-id-section {
-                padding: 20px;
-            }
-            
-            .task-description {
-                padding: 20px;
-                font-size: 1em;
-            }
-            
-            .task-description strong {
-                font-size: 1.1em;
-            }
-            
-            #user-id {
-                max-width: 100%;
+        }
+        
+        @media (max-width: 480px) {
+            .intensity-options {
+                grid-template-columns: 1fr;
+                max-width: 300px;
             }
         }
     </style>
@@ -567,7 +533,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Emotion Intensity Annotation</h1>
+            <h1>Emotion Intensity Rating</h1>
             <p>Rate the intensity of the target emotion in each voice sample</p>
         </div>
         
@@ -651,24 +617,6 @@
         </div>
     </div>
 
-    <!-- Instructions Modal -->
-    <div id="instructionsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Instructions</h2>
-                <span class="close" onclick="closeInstructions()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="instruction-text">
-                    Listen carefully and choose <span class="highlight">one score (1–5)</span> that best matches the strength of the <span class="highlight" id="modal-emotion">target emotion</span> you hear.
-                </div>
-                <div class="instruction-text">
-                    For more information, see the detailed instructions at <a href="https://ag027592.github.io/emotionalTTS-labeling-instruction/intensity.html" target="_blank" class="more-link">this link</a>.
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Finish Page Modal -->
     <div id="finishModal" class="modal">
         <div class="modal-content finish-modal">
@@ -680,9 +628,8 @@
                     <div class="finish-icon">🎊</div>
                     <h3 class="finish-title">Congratulations!</h3>
                     <p class="finish-message">
-                        You have successfully completed <strong class="emphasis-highlight">all audio emphasis annotations</strong>! 
-                        Thank you for your valuable contribution to this research. Below is your accuracy on the attention-check tasks. 
-                        Please note that your submission will not be approved if you <strong class="emphasis-highlight">fail more than 30%</strong> of these tasks.
+                        You have successfully completed <strong class="emphasis-highlight">all emotion intensity annotations</strong>! 
+                        Thank you for your valuable contribution to this research.
                     </p>
                     <div class="finish-stats">
                         <div class="stat-item">
@@ -706,12 +653,30 @@
         </div>
     </div>
 
+    <!-- Instructions Modal -->
+    <div id="instructionsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Instructions</h2>
+                <span class="close" onclick="closeInstructions()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="instruction-text">
+                    Listen carefully and choose <span class="highlight">one score (1–5)</span> that best matches the strength of the <span class="highlight" id="modal-emotion">target emotion</span> you hear.
+                </div>
+                <div class="instruction-text">
+                    For more information, see the detailed instructions at <a href="https://ag027592.github.io/emotionalTTS-labeling-instruction/intensity.html" target="_blank" class="more-link">this link</a>.
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let audioUrls = [];
         let emotionLabels = [];
         let currentIndex = 0;
         let annotations = [];
-        let currentSplit = 1; // Default split
+        let currentSplit = 1;
         
         // Get split parameter from URL
         function getSplitFromURL() {
@@ -727,7 +692,44 @@
         });
         
         function updatePageTitle() {
-            document.querySelector('.header h1').textContent = `Emotion Intensity Rating (adv.) - Split ${currentSplit}`;
+            document.querySelector('.header h1').textContent = `Emotion Intensity Rating (adj.) - Split ${currentSplit}`;
+        }
+        
+        // Proper CSV parser that handles quoted fields with commas
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            let i = 0;
+            
+            while (i < line.length) {
+                const char = line[i];
+                const nextChar = line[i + 1];
+                
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        // Handle escaped quotes ("")
+                        current += '"';
+                        i += 2;
+                        continue;
+                    } else {
+                        // Toggle quote state
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    // End of field
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+                i++;
+            }
+            
+            // Add the last field
+            result.push(current.trim());
+            
+            return result;
         }
         
         // Load audio URLs and emotion labels from CSV data
@@ -744,26 +746,25 @@
                 // Try to fetch CSV file
                 let csvText;
                 try {
-                    const csvFile = `task1_adv/adv_split${currentSplit}.csv`;
+                    const csvFile = `task2_emo_adj/intensity_split${currentSplit}.csv`;
                     const response = await fetch(csvFile);
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
                     csvText = await response.text();
                 } catch (fetchError) {
-                    // If fetch fails, show instructions for manual loading
                     updateStatus(`❌ Cannot load CSV file automatically. Please copy and paste the CSV content manually or serve the file from a local server.`, 'error');
-                    showManualLoadInstructions();
                     return;
                 }
                 
-                // Parse CSV
+                // Parse CSV with proper handling of quoted fields
                 const lines = csvText.trim().split('\n');
                 if (lines.length < 2) {
                     throw new Error('CSV file appears to be empty or has no data rows');
                 }
                 
-                const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                // Parse header line
+                const headers = parseCSVLine(lines[0]);
                 const urlIndex = headers.findIndex(h => h.toLowerCase() === 'audio_url');
                 const emotionIndex = headers.findIndex(h => h.toLowerCase() === 'emotion_label');
                 
@@ -778,14 +779,20 @@
                 audioUrls = [];
                 emotionLabels = [];
                 
-                lines.slice(1).forEach(line => {
-                    const columns = line.split(',');
-                    const url = columns[urlIndex];
-                    const emotion = columns[emotionIndex];
-                    
-                    if (url && url.trim() && emotion && emotion.trim()) {
-                        audioUrls.push(url.trim().replace(/"/g, ''));
-                        emotionLabels.push(emotion.trim().replace(/"/g, ''));
+                // Parse each data line
+                lines.slice(1).forEach((line, lineNum) => {
+                    try {
+                        const columns = parseCSVLine(line);
+                        const url = columns[urlIndex];
+                        const emotion = columns[emotionIndex];
+                        
+                        if (url && url.trim() && emotion && emotion.trim()) {
+                            audioUrls.push(url.trim());
+                            emotionLabels.push(emotion.trim());
+                        }
+                    } catch (parseError) {
+                        console.warn(`Warning: Could not parse line ${lineNum + 2}: ${line}`);
+                        console.warn(`Parse error: ${parseError.message}`);
                     }
                 });
                 
@@ -793,7 +800,7 @@
                     throw new Error('No valid audio URLs found in CSV file');
                 }
                 
-                // Randomize the order of audio URLs and emotion labels to prevent listener fatigue
+                // Randomize the order to prevent listener fatigue
                 const combined = audioUrls.map((url, index) => ({
                     url: url,
                     emotion: emotionLabels[index]
@@ -813,7 +820,7 @@
                 updateProgress();
                 loadCurrentAudio();
                 
-                // Switch from Start button to Next button and show annotation sections
+                // Switch interface
                 document.getElementById('load-btn').style.display = 'none';
                 document.getElementById('user-id-section').style.display = 'none';
                 document.getElementById('next-btn').style.display = 'inline-block';
@@ -825,28 +832,6 @@
                 console.error('Error loading data:', error);
                 updateStatus(`❌ Error loading data: ${error.message}`, 'error');
             }
-        }
-        
-        function showManualLoadInstructions() {
-            const instructionsHTML = `
-                <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 10px; margin-top: 20px;">
-                    <h4>📋 Manual CSV Loading Instructions:</h4>
-                    <ol>
-                        <li><strong>Option 1:</strong> Start a local server:
-                            <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
-# In terminal, navigate to this folder and run:
-python -m http.server 8000
-# or
-python3 -m http.server 8000
-
-# Then open: http://localhost:8000/emo_adv.html</pre>
-                        </li>
-                        <li><strong>Option 2:</strong> Copy CSV content and modify the loadDataManually() function below</li>
-                    </ol>
-                </div>
-            `;
-            
-            document.querySelector('.results-info').innerHTML = instructionsHTML;
         }
         
         function loadCurrentAudio() {
@@ -896,7 +881,7 @@ python3 -m http.server 8000
             const selectedIntensity = getSelectedIntensity();
             
             if (!selectedIntensity) {
-                updateStatus('❗ Please select an intensity rating before proceeding!', 'error');
+                updateStatus('❗ Please select an intensity level before proceeding!', 'error');
                 return;
             }
             
@@ -982,7 +967,7 @@ python3 -m http.server 8000
             console.log('Intensity annotation saved to local backup');
         }
         
-        // Keyboard shortcuts
+        // Keyboard shortcuts - dynamically handle based on intensity levels
         document.addEventListener('keydown', function(e) {
             // Only allow keyboard shortcuts after audio data is loaded
             if (audioUrls.length === 0) {
@@ -992,32 +977,27 @@ python3 -m http.server 8000
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 nextAudio();
-            } else if (e.key >= '1' && e.key <= '6') {
-                const intensityOptions = ['very-low', 'low', 'moderate', 'high', 'very-high', 'unclear'];
+            } else if (e.key >= '1' && e.key <= '5') {
+                const intensityOptions = ['very-low', 'low', 'moderate', 'high', 'very-high'];
                 const index = parseInt(e.key) - 1;
                 if (index < intensityOptions.length) {
                     document.getElementById(intensityOptions[index]).checked = true;
                 }
+            } else if (e.key.toLowerCase() === 'u') {
+                // U for "Unclear"
+                document.getElementById('unclear').checked = true;
             }
         });
         
-        // Instructions modal functions
-        function showInstructions() {
-            document.getElementById('instructionsModal').style.display = 'block';
-        }
-        
-        function closeInstructions() {
-            document.getElementById('instructionsModal').style.display = 'none';
-        }
-        
-        // Close modal when clicking outside of it
-        window.onclick = function(event) {
-            const instructionsModal = document.getElementById('instructionsModal');
+        // Finish modal functions
+        function showFinishModal() {
+            document.getElementById('total-completed').textContent = audioUrls.length;
+            document.getElementById('finishModal').style.display = 'block';
             
-            if (event.target == instructionsModal) {
-                instructionsModal.style.display = 'none';
-            }
-            // Note: Finish modal cannot be closed - completion is final
+            // Calculate accuracy after showing the modal
+            setTimeout(() => {
+                calculateAccuracy();
+            }, 500);
         }
         
         // Accuracy calculation function
@@ -1032,14 +1012,14 @@ python3 -m http.server 8000
                 accuracySection.style.display = 'block';
                 
                 // Fetch user annotations
-                const userAnnotationsResponse = await fetch(`/annotations/adv_split${currentSplit}.csv`);
+                const userAnnotationsResponse = await fetch(`/annotations/adj_split${currentSplit}.csv`);
                 if (!userAnnotationsResponse.ok) {
                     throw new Error('Could not load user annotations');
                 }
                 const userAnnotationsCsv = await userAnnotationsResponse.text();
                 
                 // Fetch ground truth answers
-                const groundTruthResponse = await fetch(`/answer/task1_adv/adv${currentSplit}.csv`);
+                const groundTruthResponse = await fetch(`/answer/task2_emo_adj/emo_adj${currentSplit}.csv`);
                 if (!groundTruthResponse.ok) {
                     throw new Error('Could not load ground truth answers');
                 }
@@ -1084,7 +1064,7 @@ python3 -m http.server 8000
                 for (const filename in userDict) {
                     if (answerDict[filename]) {
                         total++;
-                        const userAnswer = userDict[filename]; // e.g., "very-high", "low", etc.
+                        const userAnswer = userDict[filename]; // e.g., "4 - High", "2 - Low", etc.
                         const correctAnswer = answerDict[filename]; // "Hi" or "Low"
                         
                         // Apply intensity mapping logic from verify_adv.py
@@ -1140,18 +1120,26 @@ python3 -m http.server 8000
             
             return data;
         }
-
-        // Finish modal functions
-        function showFinishModal() {
-            document.getElementById('total-completed').textContent = audioUrls.length;
-            document.getElementById('finishModal').style.display = 'block';
-            
-            // Calculate accuracy after showing the modal
-            setTimeout(() => {
-                calculateAccuracy();
-            }, 500);
+        
+        // Instructions modal functions
+        function showInstructions() {
+            document.getElementById('instructionsModal').style.display = 'block';
         }
-
+        
+        function closeInstructions() {
+            document.getElementById('instructionsModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const instructionsModal = document.getElementById('instructionsModal');
+            
+            if (event.target == instructionsModal) {
+                instructionsModal.style.display = 'none';
+            }
+            // Note: Finish modal cannot be closed - completion is final
+        }
+        
         // Initialize
         updateStatus('Enter your ID and click "START" to begin annotation', '');
     </script>

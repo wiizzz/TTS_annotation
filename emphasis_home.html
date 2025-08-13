@@ -135,6 +135,88 @@
             text-decoration: underline;
         }
         
+        .instruction-link {
+            color: #ff6b35;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1em;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            border-bottom: 2px solid #ff6b35;
+            padding: 2px 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .instruction-link:hover {
+            transform: scale(1.05);
+            text-shadow: 0 2px 4px rgba(255, 107, 53, 0.3);
+        }
+        
+        .next-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .instruction-status {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .instruction-status p {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        
+        .progress-indicator {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.95em;
+        }
+        
+        .progress-indicator span {
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .next-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 250px;
+        }
+        
+        .next-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .next-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .emoji {
+            margin-right: 8px;
+        }
+        
         @media (max-width: 600px) {
             .split-options {
                 grid-template-columns: 1fr;
@@ -179,11 +261,28 @@
             <div class="description">
                 <strong>📋 Task Overview:</strong> 
                 You will listen to audio clips and identify emphasized words in each speaker's utterance. 
-                Before you begin, please review the detailed task instructions at the provided <a href="https://ag027592.github.io/emotionalTTS-labeling-instruction/emphasis.html" target="_blank" class="more-link">link</a>. 
-                Then, select the data split you would like to work on.
+                <br><br>
+                <strong>⚠️ IMPORTANT:</strong> You MUST read the detailed instructions before starting. 
+                <br>
+                👉 <a href="https://ag027592.github.io/emotionalTTS-labeling-instruction/emphasis.html" target="_blank" class="instruction-link" id="instruction-link">Click here to read the full instructions</a> 👈
             </div>
             
-            <div class="split-selection">
+            <!-- Next Button Section (Initially shown) -->
+            <div class="next-section" id="next-section">
+                <div class="instruction-status" id="instruction-status">
+                    <p id="status-text">📖 Please read the detailed instructions first</p>
+                    <div class="progress-indicator">
+                        <span id="timer-text">Please wait: <span id="countdown">30</span>s remaining</span>
+                        <span id="link-status">❌ Instructions not read yet</span>
+                    </div>
+                </div>
+                <button class="next-btn" id="next-btn" disabled onclick="showSplitSelection()">
+                    <span class="emoji">➡️</span> Continue to Split Selection
+                </button>
+            </div>
+
+            <!-- Split Selection Section (Initially hidden) -->
+            <div class="split-selection" id="split-selection" style="display: none;">
                 <h2>Select Data Split</h2>
                 <div class="split-options">
                     <a href="emphasis.html?split=1" class="split-option">
@@ -206,5 +305,109 @@
             </div>
         </div>
     </div>
+
+    <script>
+        let timeRemaining = 30; // 30 seconds
+        let instructionsRead = false;
+        let timerInterval;
+
+        // Start countdown timer when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            startCountdown();
+            setupInstructionLinkTracking();
+        });
+
+        function startCountdown() {
+            const countdownElement = document.getElementById('countdown');
+            const timerText = document.getElementById('timer-text');
+            const nextBtn = document.getElementById('next-btn');
+
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                countdownElement.textContent = timeRemaining;
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerText.innerHTML = '✅ <strong>Time requirement met</strong>';
+                    checkIfCanProceed();
+                }
+            }, 1000);
+        }
+
+        function setupInstructionLinkTracking() {
+            const instructionLink = document.getElementById('instruction-link');
+            
+            // Track when user clicks the instruction link
+            instructionLink.addEventListener('click', function(e) {
+                instructionsRead = true;
+                const linkStatus = document.getElementById('link-status');
+                linkStatus.innerHTML = '✅ <strong>Instructions opened</strong>';
+                linkStatus.style.color = '#28a745';
+                
+                // Add visual feedback
+                instructionLink.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                instructionLink.style.borderBottomColor = '#28a745';
+                
+                checkIfCanProceed();
+            });
+        }
+
+        function checkIfCanProceed() {
+            const nextBtn = document.getElementById('next-btn');
+            const statusText = document.getElementById('status-text');
+            
+            if (timeRemaining <= 0 && instructionsRead) {
+                nextBtn.disabled = false;
+                statusText.innerHTML = '🎉 <strong>Ready to continue!</strong> You can now select a data split.';
+                
+                // Add pulse animation to button
+                nextBtn.style.animation = 'pulse 2s infinite';
+                
+                // Update instruction status background
+                const instructionStatus = document.getElementById('instruction-status');
+                instructionStatus.style.background = '#d4edda';
+                instructionStatus.style.borderColor = '#28a745';
+            }
+        }
+
+        function showSplitSelection() {
+            const nextSection = document.getElementById('next-section');
+            const splitSelection = document.getElementById('split-selection');
+            
+            // Hide next section with fade out
+            nextSection.style.opacity = '0';
+            nextSection.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                nextSection.style.display = 'none';
+                splitSelection.style.display = 'block';
+                
+                // Show split selection with fade in
+                splitSelection.style.opacity = '0';
+                splitSelection.style.transform = 'translateY(20px)';
+                splitSelection.style.transition = 'all 0.5s ease';
+                
+                setTimeout(() => {
+                    splitSelection.style.opacity = '1';
+                    splitSelection.style.transform = 'translateY(0)';
+                }, 50);
+            }, 300);
+        }
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+            
+            .next-section {
+                transition: all 0.3s ease;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
