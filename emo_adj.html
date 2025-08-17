@@ -545,11 +545,11 @@
             
             <div class="status" id="status">
                 <span class="emoji">🎯</span>
-                Please enter your ID and click "Start" to begin annotation
+                Please enter your Prolific ID and click "Start" to begin annotation
             </div>
             
             <div class="user-id-section" id="user-id-section">
-                <h3>👤 Enter Your ID</h3>
+                <h3>👤 Enter Your Prolific ID</h3>
                 <div class="input-group">
                     <input type="text" id="user-id" placeholder="Enter your user ID..." maxlength="50">
                     <span class="input-note">This ID will be used to identify your annotations</span>
@@ -628,8 +628,9 @@
                     <div class="finish-icon">🎊</div>
                     <h3 class="finish-title">Congratulations!</h3>
                     <p class="finish-message">
-                        You have successfully completed <strong class="emphasis-highlight">all emotion intensity annotations</strong>! 
-                        Thank you for your valuable contribution to this research.
+                        You have successfully completed the <strong class="emphasis-highlight">Emotion Intensity Rating (adj.)</strong>! 
+                        Thank you for your valuable contribution to this research. Below is your accuracy on the attention-check tasks. 
+                        Please note that your submission cannot be approved if your accuracy <strong class="emphasis-highlight">falls below 65%</strong> on these tasks.
                     </p>
                     <div class="finish-stats">
                         <div class="stat-item">
@@ -737,7 +738,7 @@
             // Validate user ID first
             const userId = document.getElementById('user-id').value.trim();
             if (!userId) {
-                updateStatus('❗ Please enter your user ID before loading data!', 'error');
+                updateStatus('❗ Please enter your Prolific ID before loading data!', 'error');
                 document.getElementById('user-id').focus();
                 return;
             }
@@ -1141,7 +1142,7 @@
         }
         
         // Initialize
-        updateStatus('Enter your ID and click "START" to begin annotation', '');
+        updateStatus('Enter your Prolific ID and click "START" to begin annotation', '');
     </script>
 </body>
 </html>
